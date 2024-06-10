@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
-import { Modal } from 'react-bootstrap';
 import ModalDelete from './ModalDelete';
+import ModalAdd from './ModalAdd';
 type Product={
     id:number,
     product_name:string,
@@ -16,6 +16,7 @@ export default function GetAllProducts() {
     const [typeSubmit,setTypeSubmit]=useState<string>("add")
     const [products,setProducts]=useState<Product[]>([]);
     const [activeModal,setActiveModal]=useState<boolean>(false);
+    const [activeModalAdd,setActiveModalAdd]=useState<boolean>(false);
     const [product,setProduct]=useState<Product>({
         id:Math.floor(Math.random()*10000000),
         product_name:'',
@@ -81,6 +82,15 @@ export default function GetAllProducts() {
         const value=e.target.value;
         setProduct({...product,[name]:value});
     }
+    //open modal Add
+    const openModalAdd=()=>{
+        setActiveModalAdd(true);
+    }
+    //close modal Add
+    const notConfirmAdd=()=>{
+        setActiveModalAdd(false);
+        reset();
+    }
     // add new Product
     const createProduct=(e:React.FormEvent)=>{
         e.preventDefault();
@@ -126,6 +136,7 @@ export default function GetAllProducts() {
     }
     // update Product by Id
     const updateProductById=(id:number)=>{
+        setActiveModalAdd(true);
         fetch(`http://localhost:1000/products/${id}`)
         .then((response:Response)=>{
             if(response.ok){
@@ -144,7 +155,7 @@ export default function GetAllProducts() {
        setProduct({...product,id:idProduct});
        setActiveModal(true);
     }
-    //not confirm Modal
+    //not confirm Modal Del
     const notConfirmDel=()=>{
         reset();
         setActiveModal(false);
@@ -152,14 +163,8 @@ export default function GetAllProducts() {
   return (
     <div>
         {activeModal && <ModalDelete confirmDel={removeProductById} notConfirmDel={notConfirmDel}/>}
-        <form action="">
-            <input required onChange={handleChange} name='name' type="text" placeholder='Name' value={product.product_name} />
-            <input required onChange={handleChange} name='img' type="text" placeholder='Image' value={product.image} />
-            <input required min={0.1} onChange={handleChange} name='price' type="number" placeholder='Price' value={product.price}/>
-            <input required min={0} onChange={handleChange} name='quantity' type="number" placeholder='Quantity' value={product.price}/>
-            <input required onChange={handleChange} name='create_at' type="date" placeholder='Create_at'value={product.created_at} />
-            <Button onClick={createProduct} variant="warning" type='submit'>Submit</Button>
-        </form>
+        {activeModalAdd && <ModalAdd product={product} createProduct={createProduct} handleChange={handleChange} notConfirmAdd={notConfirmAdd}/>}
+         <Button onClick={openModalAdd} variant="warning">Thêm mới</Button>
       <Table striped bordered hover>
       <thead>
         <tr>
